@@ -4,32 +4,36 @@ class MarvelService {
     _apiKey = 'apikey=d7db14383d333427844a4e50816efa12'
 
     getResource = async (url) => {
-        let res = await fetch(url)
+        let res = await fetch(url);
+    
         if (!res.ok) {
-            throw new Error(`Could not fetch: ${url} status: ${res.status} `)
+            throw new Error(`Could not fetch ${url}, status: ${res.status}`);
         }
-        return await res.json()
+    
+        return await res.json();
     }
 
     getAllCharacters = async () => {
-        const res = await this.getResource(`${this._apiBase}characters?limit=9&offset=210&${this._apiKey}`) 
-        return res.data.results.map( this._transformCharacter )
+        const res = await this.getResource(`${this._apiBase}characters?limit=9&offset=210&${this._apiKey}`);
+        return res.data.results.map(this._transformCharacter);
     }
 
     getCharacter = async (id) => {
-        const res = await this.getResource(`${this._apiBase}characters/${id}?${this._apiKey}`)
-        return this._transformCharacter(res)
+        const res = await this.getResource(`${this._apiBase}characters/${id}?${this._apiKey}`);
+        return this._transformCharacter(res.data.results[0]);
     }
 
-    _transformCharacter(char) {
+    _transformCharacter = (char) => {
         return {
-            name: char.data.results[0].name,
-            description: char.data.results[0].description,
-            thumbnail: `${char.data.results[0].thumbnail.path}.${char.data.results[0].thumbnail.extension}`,
-            homepage: char.data.results[0].urls[0].url,
-            wiki: char.data.results[0].urls[1].url
+            id: char.id,
+            name: char.name,
+            description: char.description ? `${char.description.slice(0, 210)}...` : 'There is no description for this character',
+            thumbnail: char.thumbnail.path + '.' + char.thumbnail.extension,
+            homepage: char.urls[0].url,
+            wiki: char.urls[1].url,
+            comics: char.comics.items
         }
     }
 }
 
-export default MarvelService
+export default MarvelService;
